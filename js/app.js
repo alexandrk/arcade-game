@@ -3,8 +3,12 @@ var boardCoords = {
     minY: -83,
     maxX: 450,
     maxY: 450,
+    playerDefaults: {
+        startX: myConstants.canvasWidth / 2 - 50,
+        startY: myConstants.canvasHeight / 2 + 85
+    },
     squareSize: {x: 95, y: 77},
-    streets: [68, 151, 234]
+    streets: [15, 100, 185]
 }
 
 // Enemies our player must avoid
@@ -60,8 +64,9 @@ Enemy.prototype.render = function() {
 var player = function(){
 
     this.sprite = 'images/char-boy.png';
-    this.x = 200;
-    this.y = 400;
+
+    this.x = boardCoords.playerDefaults.startX;
+    this.y = boardCoords.playerDefaults.startY;
 
     //
     this.update = function(dt){
@@ -73,10 +78,11 @@ var player = function(){
                player.y < enemy.y + boardCoords.squareSize.y &&
                player.y + boardCoords.squareSize.y > enemy.y)
             {
-                console.log('collission detected: '+ enemy.number)
+                //console.log('collission detected: '+ enemy.number)
                 window.setTimeout(function(){
-                    this.x = 200;
-                    this.y = 400;
+                    this.x = boardCoords.playerDefaults.startX;
+                    this.y = boardCoords.playerDefaults.startY;
+                    window.status = 'paused';
                 },
                 200
                 );
@@ -118,12 +124,12 @@ var player = function(){
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 var allEnemies = [
-    new Enemy(-100, 68)
-    , new Enemy(-100, 151)
-    , new Enemy(-100, 234)
-    , new Enemy(-100, 68)
-    , new Enemy(-100, 151)
-    , new Enemy(-100, 234)
+    new Enemy(boardCoords.minX, boardCoords.streets[0])
+    , new Enemy(boardCoords.minX, boardCoords.streets[1])
+    , new Enemy(boardCoords.minX, boardCoords.streets[2])
+    // , new Enemy(boardCoords.minX, boardCoords.streets[0])
+    // , new Enemy(boardCoords.minX, boardCoords.streets[1])
+    // , new Enemy(boardCoords.minX, boardCoords.streets[2])
 ];
 
 

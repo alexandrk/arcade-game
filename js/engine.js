@@ -14,6 +14,15 @@
  * a little simpler to work with.
  */
 
+var myConstants = new function(){
+          this.canvasWidth = 505;
+         this.canvasHeight = 536;
+         this.startButtonX = this.canvasWidth / 2 - 125;
+         this.startButtonY = this.canvasHeight / 2 - 25;
+     this.startButtonWidth = 250;
+    this.startButtonHeight = 50;
+}
+
 var Engine = (function(global) {
     /* Predefine the variables we'll be using within this scope,
      * create the canvas element, grab the 2D context for that canvas
@@ -24,9 +33,11 @@ var Engine = (function(global) {
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
         lastTime;
+    
+    global.status = 'paused';
 
-    canvas.width = 505;
-    canvas.height = 606;
+    canvas.width = myConstants.canvasWidth;
+    canvas.height = myConstants.canvasHeight;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -56,8 +67,114 @@ var Engine = (function(global) {
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-        win.requestAnimationFrame(main);
+
+        if (global.status == 'paused'){
+            startMenu();
+        }
+        else if (global.status == 'start'){
+            win.requestAnimationFrame(main);
+        }
     };
+
+    /* 
+     * Function: Start Menu
+     */
+    function startMenu(){
+
+        var currentCanvas = ctx.getImageData(0, 0, myConstants.canvasWidth, myConstants.canvasHeight);
+        var pixels = currentCanvas.data.length / 4;
+
+        // Shade current Canvas
+        for (var i = 0; i < pixels; i++){
+          currentCanvas.data[i * 4 + 3] = 125;
+        }
+        ctx.putImageData(currentCanvas, 0, 0);
+
+        drawStartButton();
+        canvas.addEventListener('mousemove', buttonOver, false);
+        canvas.addEventListener('click', startGame, false);
+    }
+
+    function startGame(evt){
+        var mouseX = evt.clientX - canvas.offsetLeft;
+            mouseY = evt.clientY - canvas.offsetTop;
+
+        if (
+            mouseX >=  ((myConstants.canvasWidth / 2 ) - (myConstants.startButtonWidth / 2)) &&
+            mouseX <=  ((myConstants.canvasWidth / 2 ) + (myConstants.startButtonWidth / 2)) &&
+            mouseY >=  ((myConstants.canvasHeight / 2 ) - (myConstants.startButtonHeight / 2)) &&
+            mouseY <=  ((myConstants.canvasHeight / 2 ) + (myConstants.startButtonHeight / 2))
+        ){
+            global.status = 'start';
+            win.requestAnimationFrame(main);
+        }
+    }
+
+    function drawStartButton(type){
+
+        ctx.strokeStyle = "#555555";
+        ctx.lineWidth = 2;
+        ctx.font = "35pt impact";
+        ctx.textAlign = "center";
+
+        if (type == 'over'){
+            ctx.fillStyle = "#52864C";
+        }
+        else {
+            var my_gradient = ctx.createLinearGradient(myConstants.startButtonX,
+                                                       myConstants.startButtonY,
+                                                       myConstants.startButtonX,
+                                                       myConstants.startButtonY + myConstants.startButtonHeight);
+            my_gradient.addColorStop(0, "#52864C");
+            my_gradient.addColorStop(1, "#A2DE7C");
+            ctx.fillStyle = my_gradient;
+        }
+        drawRoundedRectanle(myConstants.startButtonX, myConstants.startButtonY, myConstants.startButtonWidth, myConstants.startButtonHeight, 10);
+
+        ctx.fillStyle = "white";
+        ctx.fillText("Start", myConstants.startButtonX + 120, myConstants.startButtonY + 42);
+        ctx.strokeText("Start", myConstants.startButtonX + 120, myConstants.startButtonY + 42);    
+
+    }
+
+    /*
+    * Function: Button Over
+    */
+    function buttonOver(evt){
+
+        var mouseX = evt.clientX - canvas.offsetLeft
+            mouseY = evt.clientY - canvas.offsetTop;
+
+        if (
+            mouseX >=  ((myConstants.canvasWidth / 2 ) - (myConstants.startButtonWidth / 2)) &&
+            mouseX <=  ((myConstants.canvasWidth / 2 ) + (myConstants.startButtonWidth / 2)) &&
+            mouseY >=  ((myConstants.canvasHeight / 2 ) - (myConstants.startButtonHeight / 2)) &&
+            mouseY <=  ((myConstants.canvasHeight / 2 ) + (myConstants.startButtonHeight / 2))
+        ){
+            evt.target.style.cursor = 'pointer';
+            drawStartButton('over');
+        }
+        else{
+            evt.target.style.cursor = 'default';
+            drawStartButton('none');
+        }
+
+    }
+
+    function drawRoundedRectanle(x, y, width, height, r){
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + width - r, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+        ctx.lineTo(x + width, y + height - r);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        ctx.lineTo(x + r, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.fill();
+        ctx.stroke();
+    }
 
     /* This function does some initial setup that should only occur once,
      * particularly setting the lastTime variable that is required for the
@@ -132,7 +249,7 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83 - 50);
             }
         }
 
