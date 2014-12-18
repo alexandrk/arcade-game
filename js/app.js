@@ -1,15 +1,28 @@
-var boardCoords = {
-    minX: -101,
-    minY: -83,
-    maxX: 450,
-    maxY: 450,
-    playerDefaults: {
-        startX: myConstants.canvasWidth / 2 - 50,
-        startY: myConstants.canvasHeight / 2 + 85
-    },
-    squareSize: {x: 95, y: 77},
-    streets: [15, 100, 185]
-}
+var Constants = new function(){
+    this.canvasWidth = 505;
+    this.canvasHeight = 536;
+    this.startButtonX = this.canvasWidth / 2 - 125;
+    this.startButtonY = this.canvasHeight / 2 - 25;
+    this.startButtonWidth = 250;
+    this.startButtonHeight = 50;
+    this.infoBarHeight = 83;
+};
+
+var boardCoords = new function(){
+    this.minX = -80;
+    this.minY = -80;
+    this.maxX = 450;
+    this.maxY = 400;
+    this.squareSize = {x: 101, y: 171};
+    this.hitZone = {width: 90, height: 70};
+    this.streets = [15, 100, 185];
+    this.playerDefaults = {
+        startX: Constants.canvasWidth / 2 - this.squareSize.x / 2,
+        startY: Constants.canvasHeight - this.squareSize.y - 10,
+        moveX: 100,
+        moveY: 83
+    };
+};
 
 // Enemies our player must avoid
 var Enemy = function(x, y) {
@@ -26,7 +39,7 @@ var Enemy = function(x, y) {
 }
 
 Enemy.prototype.getNumber = function(){
-    var i = 1
+    var i = 1;
     return function(){return i++};
 }();
 
@@ -51,14 +64,14 @@ Enemy.prototype.update = function(dt) {
         this.y = boardCoords.streets[Math.floor(Math.random() * boardCoords.streets.length)];
         this.speed = this.getSpeed();
     }
-}
+};
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-}
+};
 
-// Now write your own player class
+// Player class
 // This class requires an update(), render() and
 // a handleInput() method.
 var player = function(){
@@ -71,23 +84,35 @@ var player = function(){
     //
     this.update = function(dt){
 
-        //Collission Detection
+        if (window.status == 'no action') {
+            this.x = boardCoords.playerDefaults.startX;
+            this.y = boardCoords.playerDefaults.startY;
+        }
+
+        //Collision Detection
         allEnemies.forEach(function(enemy){
-            if (player.x < enemy.x + boardCoords.squareSize.x &&
-               player.x + boardCoords.squareSize.x > enemy.x &&
-               player.y < enemy.y + boardCoords.squareSize.y &&
-               player.y + boardCoords.squareSize.y > enemy.y)
+            if (player.x < enemy.x + boardCoords.hitZone.width &&
+               player.x + boardCoords.hitZone.width > enemy.x &&
+               player.y < enemy.y + boardCoords.hitZone.height &&
+               player.y + boardCoords.hitZone.height > enemy.y)
             {
-                //console.log('collission detected: '+ enemy.number)
+                //console.log('collission detected: '+ enemy.number);
+                //console.log('player: {'+ player.x + ', ' + player.y + '}');
+                //console.log('enemy: {'+ enemy.x + ', ' + enemy.y + '}');
                 window.setTimeout(function(){
-                    this.x = boardCoords.playerDefaults.startX;
-                    this.y = boardCoords.playerDefaults.startY;
-                    window.status = 'paused';
+                    //this.x = boardCoords.playerDefaults.startX;
+                    //this.y = boardCoords.playerDefaults.startY;
+                    window.status = 'collision detected';
                 },
                 200
                 );
             }
-        })
+        });
+
+        // Successfully passed the bugs (considered a WIN)
+        if (player.y <= boardCoords.streets[0]){
+            window.status = 'level completed';
+        }
     }
 
     //
@@ -100,16 +125,16 @@ var player = function(){
         if (input !== undefined){
             switch (input){
                 case 'up':
-                    this.y -= (this.y - 83 > -83) ? 83 : 0;
+                    this.y -= (this.y - boardCoords.playerDefaults.moveY > boardCoords.minY) ? boardCoords.playerDefaults.moveY : 0;
                     break;
                 case 'down':
-                    this.y += (this.y + 83 < 450) ? 83 : 0;
+                    this.y += (this.y + boardCoords.playerDefaults.moveY < boardCoords.maxY) ? boardCoords.playerDefaults.moveY : 0;
                     break;
                 case 'left':
-                    this.x -= (this.x - 101 > -101) ? 101 : 0;
+                    this.x -= (this.x - boardCoords.playerDefaults.moveX > boardCoords.minX) ? boardCoords.playerDefaults.moveX : 0;
                     break;
                 case 'right':
-                    this.x += (this.x + 101 < 450) ? 101 : 0;;
+                    this.x += (this.x + boardCoords.playerDefaults.moveX < boardCoords.maxX) ? boardCoords.playerDefaults.moveX : 0;
                     break;
             }
         }
@@ -127,9 +152,9 @@ var allEnemies = [
     new Enemy(boardCoords.minX, boardCoords.streets[0])
     , new Enemy(boardCoords.minX, boardCoords.streets[1])
     , new Enemy(boardCoords.minX, boardCoords.streets[2])
-    // , new Enemy(boardCoords.minX, boardCoords.streets[0])
-    // , new Enemy(boardCoords.minX, boardCoords.streets[1])
-    // , new Enemy(boardCoords.minX, boardCoords.streets[2])
+    , new Enemy(boardCoords.minX, boardCoords.streets[0])
+    , new Enemy(boardCoords.minX, boardCoords.streets[1])
+    , new Enemy(boardCoords.minX, boardCoords.streets[2])
 ];
 
 

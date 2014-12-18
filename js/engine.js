@@ -14,15 +14,6 @@
  * a little simpler to work with.
  */
 
-var myConstants = new function(){
-          this.canvasWidth = 505;
-         this.canvasHeight = 536;
-         this.startButtonX = this.canvasWidth / 2 - 125;
-         this.startButtonY = this.canvasHeight / 2 - 25;
-     this.startButtonWidth = 250;
-    this.startButtonHeight = 50;
-}
-
 var Engine = (function(global) {
     /* Predefine the variables we'll be using within this scope,
      * create the canvas element, grab the 2D context for that canvas
@@ -36,145 +27,59 @@ var Engine = (function(global) {
     
     global.status = 'paused';
 
-    canvas.width = myConstants.canvasWidth;
-    canvas.height = myConstants.canvasHeight;
+    canvas.width = Constants.canvasWidth;
+    canvas.height = Constants.canvasHeight;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
     function main() {
+
         /* Get our time delta information which is required if your game
          * requires smooth animation. Because everyone's computer processes
          * instructions at different speeds we need a constant value that
          * would be the same for everyone (regardless of how fast their
          * computer is) - hurray time!
          */
+
         var now = Date.now(),
             dt = (now - lastTime) / 1000.0;
 
-        /* Call our update/render functions, pass along the time delta to
-         * our update function since it may be used for smooth animation.
-         */
-        update(dt);
-        render();
-
-        /* Set our lastTime variable which is used to determine the time delta
-         * for the next time this function is called.
-         */
-        lastTime = now;
-
-        /* Use the browser's requestAnimationFrame function to call this
-         * function again as soon as the browser is able to draw another frame.
-         */
-
-        if (global.status == 'paused'){
-            startMenu();
+        if (global.status == 'initial load'){
+            render();
+            Menu.startMenu();
         }
-        else if (global.status == 'start'){
-            win.requestAnimationFrame(main);
+
+        else if (global.status == 'level completed'){
+            Menu.levelCompleted();
+            Menu.startMenu();
         }
+
+        else if (global.status == 'collision detected'){
+            Menu.collisionDetected();
+            Menu.startMenu();
+        }
+
+        else if (global.status == 'in progress') {
+
+            /* Call our update/render functions, pass along the time delta to
+             * our update function since it may be used for smooth animation.
+             */
+            update(dt);
+            render();
+
+            /* Set our lastTime variable which is used to determine the time delta
+             * for the next time this function is called.
+             */
+            lastTime = now;
+
+            /* Use the browser's requestAnimationFrame function to call this
+             * function again as soon as the browser is able to draw another frame.
+             */
+        }
+        win.requestAnimationFrame(main);
     };
-
-    /* 
-     * Function: Start Menu
-     */
-    function startMenu(){
-
-        var currentCanvas = ctx.getImageData(0, 0, myConstants.canvasWidth, myConstants.canvasHeight);
-        var pixels = currentCanvas.data.length / 4;
-
-        // Shade current Canvas
-        for (var i = 0; i < pixels; i++){
-          currentCanvas.data[i * 4 + 3] = 125;
-        }
-        ctx.putImageData(currentCanvas, 0, 0);
-
-        drawStartButton();
-        canvas.addEventListener('mousemove', buttonOver, false);
-        canvas.addEventListener('click', startGame, false);
-    }
-
-    function startGame(evt){
-        var mouseX = evt.clientX - canvas.offsetLeft;
-            mouseY = evt.clientY - canvas.offsetTop;
-
-        if (
-            mouseX >=  ((myConstants.canvasWidth / 2 ) - (myConstants.startButtonWidth / 2)) &&
-            mouseX <=  ((myConstants.canvasWidth / 2 ) + (myConstants.startButtonWidth / 2)) &&
-            mouseY >=  ((myConstants.canvasHeight / 2 ) - (myConstants.startButtonHeight / 2)) &&
-            mouseY <=  ((myConstants.canvasHeight / 2 ) + (myConstants.startButtonHeight / 2))
-        ){
-            global.status = 'start';
-            win.requestAnimationFrame(main);
-        }
-    }
-
-    function drawStartButton(type){
-
-        ctx.strokeStyle = "#555555";
-        ctx.lineWidth = 2;
-        ctx.font = "35pt impact";
-        ctx.textAlign = "center";
-
-        if (type == 'over'){
-            ctx.fillStyle = "#52864C";
-        }
-        else {
-            var my_gradient = ctx.createLinearGradient(myConstants.startButtonX,
-                                                       myConstants.startButtonY,
-                                                       myConstants.startButtonX,
-                                                       myConstants.startButtonY + myConstants.startButtonHeight);
-            my_gradient.addColorStop(0, "#52864C");
-            my_gradient.addColorStop(1, "#A2DE7C");
-            ctx.fillStyle = my_gradient;
-        }
-        drawRoundedRectanle(myConstants.startButtonX, myConstants.startButtonY, myConstants.startButtonWidth, myConstants.startButtonHeight, 10);
-
-        ctx.fillStyle = "white";
-        ctx.fillText("Start", myConstants.startButtonX + 120, myConstants.startButtonY + 42);
-        ctx.strokeText("Start", myConstants.startButtonX + 120, myConstants.startButtonY + 42);    
-
-    }
-
-    /*
-    * Function: Button Over
-    */
-    function buttonOver(evt){
-
-        var mouseX = evt.clientX - canvas.offsetLeft
-            mouseY = evt.clientY - canvas.offsetTop;
-
-        if (
-            mouseX >=  ((myConstants.canvasWidth / 2 ) - (myConstants.startButtonWidth / 2)) &&
-            mouseX <=  ((myConstants.canvasWidth / 2 ) + (myConstants.startButtonWidth / 2)) &&
-            mouseY >=  ((myConstants.canvasHeight / 2 ) - (myConstants.startButtonHeight / 2)) &&
-            mouseY <=  ((myConstants.canvasHeight / 2 ) + (myConstants.startButtonHeight / 2))
-        ){
-            evt.target.style.cursor = 'pointer';
-            drawStartButton('over');
-        }
-        else{
-            evt.target.style.cursor = 'default';
-            drawStartButton('none');
-        }
-
-    }
-
-    function drawRoundedRectanle(x, y, width, height, r){
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + width - r, y);
-        ctx.quadraticCurveTo(x + width, y, x + width, y + r);
-        ctx.lineTo(x + width, y + height - r);
-        ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
-        ctx.lineTo(x + r, y + height);
-        ctx.quadraticCurveTo(x, y + height, x, y + height - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.fill();
-        ctx.stroke();
-    }
 
     /* This function does some initial setup that should only occur once,
      * particularly setting the lastTime variable that is required for the
@@ -277,7 +182,8 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        global.status = 'initial load';
+
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -297,5 +203,6 @@ var Engine = (function(global) {
      * object when run in a browser) so that developer's can use it more easily
      * from within their app.js files.
      */
+    global.canvas = canvas;
     global.ctx = ctx;
 })(this);
