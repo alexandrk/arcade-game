@@ -1,23 +1,28 @@
 var Menu = new function(){
 
+    this.gameState = {
+             collision: 'collision detected',
+        levelCompleted: 'level completed',
+               newGame: 'new game',
+              gameOver: 'game over',
+        initialization: 'initial load',
+            inProgress: 'in progress',
+               restart: 'restart',
+                 reset: 'resetPlayer'
+    }
 
-        /*
-         * Function: Start Menu
-         * Description: shows menu overlay
-         */
-    this.startMenu = function(){
-
-
+    /*
+     * Function: Start Menu
+     * Description: shows menu overlay
+     */
+    this.startMenu = function()
+    {
         shadeCurrentCanvas();
-
         drawStartButton();
 
         // Add Events to the Canvas
-        canvas.addEventListener('mousemove', buttonOver, false);
-        canvas.addEventListener('click', startGame, false);
-
-        // Update Global State of the game
-        window.status = 'no action';
+        ctx.canvas.addEventListener('mousemove', buttonOver, false);
+        ctx.canvas.addEventListener('click', startGame, false);
     };
 
     /*
@@ -25,8 +30,8 @@ var Menu = new function(){
      * Description: draws the button on the canvas
      * Parameters: {type} - determines style change
      */
-    function drawStartButton(type){
-
+    function drawStartButton(type)
+    {
         ctx.strokeStyle = "#555555";
         ctx.lineWidth = 2;
         ctx.font = "35pt impact";
@@ -50,7 +55,6 @@ var Menu = new function(){
         ctx.fillStyle = "white";
         ctx.fillText("Start", Constants.startButtonX + 120, Constants.startButtonY + 42);
         ctx.strokeText("Start", Constants.startButtonX + 120, Constants.startButtonY + 42);
-
     }
 
     /*
@@ -60,13 +64,12 @@ var Menu = new function(){
     function startGame(evt){
 
         if (withInStartButton(evt)){
-            //move player to start, based on status
-            player.update();
-            window.status = 'in progress';
+
+            window.status = Menu.gameState.newGame;
 
             // Removes event listeners that are only used in the start menu
-            canvas.removeEventListener('mousemove', buttonOver, false);
-            canvas.removeEventListener('click', startGame, false);
+            ctx.canvas.removeEventListener('mousemove', buttonOver, false);
+            ctx.canvas.removeEventListener('click', startGame, false);
         }
     }
 
@@ -84,7 +87,6 @@ var Menu = new function(){
             evt.target.style.cursor = 'default';
             drawStartButton();
         }
-
     }
 
     /*
@@ -104,8 +106,8 @@ var Menu = new function(){
      * Description: helper, used in determining start button borders
      */
     function withInStartButton(evt){
-        var mouseX = evt.clientX - canvas.offsetLeft,
-            mouseY = evt.clientY - canvas.offsetTop;
+        var mouseX = evt.clientX - ctx.canvas.offsetLeft,
+            mouseY = evt.clientY - ctx.canvas.offsetTop;
 
         return (
             mouseX >=  ((Constants.canvasWidth / 2 ) - (Constants.startButtonWidth / 2)) &&
@@ -133,6 +135,7 @@ var Menu = new function(){
         ctx.quadraticCurveTo(x, y + height, x, y + height - r);
         ctx.lineTo(x, y + r);
         ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
     }
@@ -151,7 +154,8 @@ var Menu = new function(){
         ctx.fillText('Completed', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
         ctx.strokeText('Completed', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
 
-    }
+        restart();
+    };
 
     /*
      * Function: collisionDetected
@@ -166,5 +170,27 @@ var Menu = new function(){
         ctx.fillText('Failed', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
         ctx.strokeText('Failed', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
 
+        restart();
+
+    };
+
+    function restart(){
+        window.setTimeout(function(){
+            window.status = Menu.gameState.restart;
+        }, 300);
+    }
+
+    /*
+     * Function: gameOver
+     */
+    this.gameOver = function(){
+        shadeCurrentCanvas();
+        ctx.fillStyle = '#cc0000';
+        ctx.strokeStyle = 'black';
+        ctx.fillRect(0, 0, Constants.canvasWidth, Constants.infoBarHeight);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('Game Over', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
+        ctx.strokeText('Game Over', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
     }
 };

@@ -24,8 +24,6 @@ var Engine = (function(global) {
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
         lastTime;
-    
-    global.status = 'paused';
 
     canvas.width = Constants.canvasWidth;
     canvas.height = Constants.canvasHeight;
@@ -46,22 +44,26 @@ var Engine = (function(global) {
         var now = Date.now(),
             dt = (now - lastTime) / 1000.0;
 
-        if (global.status == 'initial load'){
+        if (global.status == Menu.gameState.initialization){
             render();
             Menu.startMenu();
         }
-
-        else if (global.status == 'level completed'){
+        else if (global.status == Menu.gameState.levelCompleted){
             Menu.levelCompleted();
-            Menu.startMenu();
         }
-
-        else if (global.status == 'collision detected'){
+        else if (global.status == Menu.gameState.collision){
             Menu.collisionDetected();
+        }
+        else if (global.status == Menu.gameState.gameOver){
+            Menu.gameOver();
             Menu.startMenu();
         }
 
-        else if (global.status == 'in progress') {
+        else if (
+            global.status == Menu.gameState.newGame ||
+            global.status == Menu.gameState.restart ||
+            global.status == Menu.gameState.inProgress
+        ){
 
             /* Call our update/render functions, pass along the time delta to
              * our update function since it may be used for smooth animation.
@@ -182,7 +184,7 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        global.status = 'initial load';
+        global.status = Menu.gameState.initialization;
 
     }
 
@@ -203,6 +205,5 @@ var Engine = (function(global) {
      * object when run in a browser) so that developer's can use it more easily
      * from within their app.js files.
      */
-    global.canvas = canvas;
     global.ctx = ctx;
 })(this);
