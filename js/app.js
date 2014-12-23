@@ -24,63 +24,86 @@ var boardCoords = new function(){
     };
 };
 
-// Enemies our player must avoid
-var Enemy = function(x, y) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
+/* -----------------====| Enemy |====----------------- */
+/*
+ * Creates an enemy entity
+ * @constructor
+ */
+var Enemy = function() {
     this.sprite = 'images/enemy-bug.png';
-    this.x = x;
-    this.y = y;
-    this.speed = this.getSpeed();
     this.number = this.getNumber();
+    this.reset();
 }
 
+/*
+ * Function: getNumber
+ * Assigns each enemy a unique auto-incremented identifier
+ */
 Enemy.prototype.getNumber = function(){
     var i = 1;
     return function(){return i++};
 }();
 
-// Generates random speed for the enemies
+/*
+ * Function: getSpeed
+ * Returns random speed for enemy movements
+ */
 Enemy.prototype.getSpeed = function(){
     var speeds = [50, 75, 100, 125, 150, 175, 200, 225, 250];
     var randomArrayIndex = Math.floor(Math.random() * speeds.length);
     return speeds[randomArrayIndex];
 }
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
+/*
+ * Function: update
+ * Update the enemy's position
+ * @param {float} dt - a time delta between ticks
+ */
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
+    // You should multiply any movement by the dt parameter to ensure
+    // the game runs at the same speed on different devices
     this.x += this.speed * dt;
 
-    // return bug to a random street line
-    if (this.x > boardCoords.maxX + 100){
-        this.x = boardCoords.minX;
-        this.y = boardCoords.streets[Math.floor(Math.random() * boardCoords.streets.length)];
-        this.speed = this.getSpeed();
+    if (this.x > boardCoords.maxX + 100) {
+        this.reset();
     }
 };
 
-// Draw the enemy on the screen, required method for game
+/*
+ * Function: reset
+ * Resets enemy to a random street and assigns random speed
+ */
+Enemy.prototype.reset = function(){
+    this.x = boardCoords.minX;
+    this.y = boardCoords.streets[Math.floor(Math.random() * boardCoords.streets.length)];
+    this.speed = this.getSpeed();
+}
+
+/*
+ * Function: render
+ * Draw the enemy on the screen, required method for game
+ */
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// Player class
-// This class requires an update(), render() and
-// a handleInput() method.
-var Player = function(character){
 
+/* -----------------====| Player |====----------------- */
+/*
+ * Creates a player entity with specified character image
+ * @constructor
+ */
+var Player = function(character)
+{
     this.sprite = character;
-    this.life = 3;
-    this.reset();
+    this.reset(true);
 };
 
+/*
+ * Function: reset
+ *  - resets players x, y coordinates to the default
+ *  - @param {bool} resetLife - triggers players life reset to default value
+ */
 Player.prototype.reset = function(resetLife)
 {
     // default value for the reset life parameter (true)
@@ -92,51 +115,78 @@ Player.prototype.reset = function(resetLife)
     this.life = (resetLife) ? 3 : this.life;
 };
 
+/*
+ * Function: update
+ * Updates the players position
+ * @param {float} dt - a time delta between ticks
+ */
 Player.prototype.update = function(dt)
 {
+    /* Reset player to the default coordinates, if game is in one of the following states */
     if (window.status == Menu.gameState.newGame ||
         window.status == Menu.gameState.reset ||
         window.status == Menu.gameState.restart
     ){
 
-        //reset player coordinates, and life
-        var resetLife = window.status == Menu.gameState.newGame;
+        /* Reset player's life, if game state is 'newGame' */
+        var resetLife = (window.status == Menu.gameState.newGame);
         this.reset(resetLife);
 
-        //changing game state to 'in progress'
+        /* Change game state to 'inProgress' */
         window.status = Menu.gameState.inProgress;
     }
 
-    // Collision Detection
-    // Note: Dependent on player instance and allEnemies array
+    /*
+     * Collision Detection Logic
+     *  - Dependent on global allEnemies array
+     *  + if collision found:
+     *      - game state is updated to 'collision'
+     *      - player's life is decreased
+     */
     for (var i = 0; i < allEnemies.length; i++)
     {
         var enemy = allEnemies[i];
-        if (player.x < enemy.x + boardCoords.hitZone.width &&
-           player.x + boardCoords.hitZone.width > enemy.x &&
-           player.y < enemy.y + boardCoords.hitZone.height &&
-           player.y + boardCoords.hitZone.height > enemy.y)
+        if (this.x < enemy.x + boardCoords.hitZone.width &&
+           this.x + boardCoords.hitZone.width > enemy.x &&
+           this.y < enemy.y + boardCoords.hitZone.height &&
+           this.y + boardCoords.hitZone.height > enemy.y)
         {
             window.status = Menu.gameState.collision;
-            player.life -= 1;
+            this.life -= 1;
             break;
         }
     }
 
-    // Successfully passed the bugs (considered a WIN)
-    if (this.y <= boardCoords.streets[0]){
-        window.status = Menu.gameState.levelCompleted;
-    }
-    // Game Over, no life left
-    else if (this.life <= 0){
+    /*
+     * Game Over, no life left
+     *  - game state is updated to 'gameOver'
+     */
+    if (this.life <= 0){
         window.status = Menu.gameState.gameOver;
     }
+    /*
+     * Successfully reached the river
+     *  - game state is updated to 'levelCompleted'
+     */
+    else if (this.y <= boardCoords.streets[0]){
+
+        Level.levelUp();
+        Level.render();
+
+        window.status = Menu.gameState.levelCompleted;
+    }
+
+    game.updateTime(dt);
 };
 
+/*
+ * Function: drawLife
+ * Helper function to draw players lives left in heart shapes
+ */
 Player.prototype.drawLife = function(life)
 {
     ctx.save();
-    ctx.fillStyle = "#ff0000";
+    ctx.fillStyle = "rgba(255, 0, 0, 0.7)"
     ctx.scale(.5, .5);
 
     for (var i = 0; i < life; i++) {
@@ -155,13 +205,25 @@ Player.prototype.drawLife = function(life)
     ctx.restore();
 };
 
-//
+/*
+ * Function: render
+ * Draw the player on the screen, based on:
+ *  - this.sprite
+ *  - this.x
+ *  - this.y
+ * Draws players life left
+ */
 Player.prototype.render = function(){
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y)
     this.drawLife(this.life);
+    game.render();
 }
 
-//
+/*
+ * Function: handleInput
+ * Listen for control keys, if game state is 'inProgress'
+ * Prevent player's character to go off screen
+ */
 Player.prototype.handleInput = function(input){
 
     if (input !== undefined && window.status == Menu.gameState.inProgress){
@@ -182,18 +244,75 @@ Player.prototype.handleInput = function(input){
     }
 };
 
+//
+var Level = new function(){
+    this.number = 1;
+
+    this.levelUp = function(){
+        this.number++;
+        game.resetTime();
+        allEnemies.push(new Enemy());
+    };
+
+    this.reset = function(){
+        this.number = 1;
+        allEnemies = [new Enemy()];
+    }
+
+    this.getNextLevelMessage = function(){
+        return "Level " + this.number;
+    }
+
+    this.render = function(){
+        ctx.fillText("Level " + this.number, ctx.canvas.width / 2, ctx.canvas.height / 2);
+        ctx.strokeText("Level " + this.number, ctx.canvas.width / 2, ctx.canvas.height / 2);
+    }
+};
+
+var Game = function(){
+    this.points = 0;
+    this.timeLeft = 30;
+    this.timestamp = Date.now();
+
+    this.updateTime = function(dt){
+
+        if (Date.now() - this.timestamp > 1000) {
+            this.timeLeft -= 1;
+            this.timestamp = Date.now();
+            console.log(this.timestamp);
+        }
+
+        if (this.timeLeft == 0){
+            player.life -= 1;
+            this.resetTime();
+        }
+    };
+
+    this.render = function(){
+        this.renderTimeLeft();
+    };
+
+    this.renderTimeLeft = function()
+    {
+        ctx.save();
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.textAlign = "left";
+            ctx.fillText("Time Left: " + this.timeLeft.toString(), Constants.canvasWidth / 2, Constants.infoBarHeight - 25);
+        ctx.restore();
+    };
+
+    this.resetTime = function(){
+        this.timeLeft = 30;
+    }
+};
+
+var game = new Game();
+
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var allEnemies = [
-    new Enemy(boardCoords.minX, boardCoords.streets[0])
-    , new Enemy(boardCoords.minX, boardCoords.streets[1])
-    , new Enemy(boardCoords.minX, boardCoords.streets[2])
-    , new Enemy(boardCoords.minX, boardCoords.streets[0])
-    , new Enemy(boardCoords.minX, boardCoords.streets[1])
-    , new Enemy(boardCoords.minX, boardCoords.streets[2])
-];
+var allEnemies = [];
 
 var player = new Player('images/char-boy.png');
 

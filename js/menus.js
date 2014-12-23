@@ -1,22 +1,25 @@
-var Menu = new function(){
+var Menu = new function() {
 
     this.gameState = {
-             collision: 'collision detected',
+        collision: 'collision detected',
         levelCompleted: 'level completed',
-               newGame: 'new game',
-              gameOver: 'game over',
+        newGame: 'new game',
+        gameOver: 'game over',
         initialization: 'initial load',
-            inProgress: 'in progress',
-               restart: 'restart',
-                 reset: 'resetPlayer'
-    }
+        inProgress: 'in progress',
+        playAgain: ' play again',
+        restart: 'restart',
+        reset: 'resetPlayer'
+    };
+
+    this.countDown = 100;
+    this.doFadingMessage = true;
 
     /*
      * Function: Start Menu
      * Description: shows menu overlay
      */
-    this.startMenu = function()
-    {
+    this.startMenu = function () {
         shadeCurrentCanvas();
         drawStartButton();
 
@@ -30,14 +33,13 @@ var Menu = new function(){
      * Description: draws the button on the canvas
      * Parameters: {type} - determines style change
      */
-    function drawStartButton(type)
-    {
+    function drawStartButton(type) {
         ctx.strokeStyle = "#555555";
         ctx.lineWidth = 2;
         ctx.font = "35pt impact";
         ctx.textAlign = "center";
 
-        if (type == 'over'){
+        if (type == 'over') {
             ctx.fillStyle = "#52864C";
 
         }
@@ -61,11 +63,12 @@ var Menu = new function(){
      * Function: startGame
      * Description: event handler for 'Start' menus button click
      */
-    function startGame(evt){
+    function startGame(evt) {
 
-        if (withInStartButton(evt)){
+        if (withInStartButton(evt)) {
 
             window.status = Menu.gameState.newGame;
+            Level.reset();
 
             // Removes event listeners that are only used in the start menu
             ctx.canvas.removeEventListener('mousemove', buttonOver, false);
@@ -77,13 +80,13 @@ var Menu = new function(){
      * Function: buttonOver
      * Description: event handler for when the cursor is over the button
      */
-    function buttonOver(evt){
+    function buttonOver(evt) {
 
-        if (withInStartButton(evt)){
+        if (withInStartButton(evt)) {
             evt.target.style.cursor = 'pointer';
             drawStartButton('over');
         }
-        else{
+        else {
             evt.target.style.cursor = 'default';
             drawStartButton();
         }
@@ -93,10 +96,10 @@ var Menu = new function(){
      * Function: shadeCurrentCanvas
      * Description: helper, shades current state of the canvas
      */
-    function shadeCurrentCanvas(){
+    function shadeCurrentCanvas() {
         var currentCanvas = ctx.getImageData(0, 0, Constants.canvasWidth, Constants.canvasHeight);
         var pixels = currentCanvas.data.length / 4;
-        for (var i = 0; i < pixels; i++){
+        for (var i = 0; i < pixels; i++) {
             currentCanvas.data[i * 4 + 3] = 125;
         }
         ctx.putImageData(currentCanvas, 0, 0);
@@ -105,15 +108,15 @@ var Menu = new function(){
     /* Function withInStartButton
      * Description: helper, used in determining start button borders
      */
-    function withInStartButton(evt){
+    function withInStartButton(evt) {
         var mouseX = evt.clientX - ctx.canvas.offsetLeft,
             mouseY = evt.clientY - ctx.canvas.offsetTop;
 
         return (
-            mouseX >=  ((Constants.canvasWidth / 2 ) - (Constants.startButtonWidth / 2)) &&
-            mouseX <=  ((Constants.canvasWidth / 2 ) + (Constants.startButtonWidth / 2)) &&
-            mouseY >=  ((Constants.canvasHeight / 2 ) - (Constants.startButtonHeight / 2)) &&
-            mouseY <=  ((Constants.canvasHeight / 2 ) + (Constants.startButtonHeight / 2))
+        mouseX >= ((Constants.canvasWidth / 2 ) - (Constants.startButtonWidth / 2)) &&
+        mouseX <= ((Constants.canvasWidth / 2 ) + (Constants.startButtonWidth / 2)) &&
+        mouseY >= ((Constants.canvasHeight / 2 ) - (Constants.startButtonHeight / 2)) &&
+        mouseY <= ((Constants.canvasHeight / 2 ) + (Constants.startButtonHeight / 2))
         );
     }
 
@@ -121,7 +124,7 @@ var Menu = new function(){
      * Function: drawRoundedRectanle
      * Description: helper func, used to draw rounded button rectangle
      */
-    function drawRoundedRectanle(x, y, width, height, r){
+    function drawRoundedRectanle(x, y, width, height, r) {
 
         //console.log(ctx.fillStyle);
 
@@ -143,54 +146,64 @@ var Menu = new function(){
     /*
      * Function: levelCompleted
      */
-    this.levelCompleted = function(){
+    this.levelCompleted = function()
+    {
+        var color = "0, 200, 0";
+        var message = Level.getNextLevelMessage();
+
+        this.fadeMessage(color, message, true);
+    };
+
+    this.fadeMessage = function(color, message, doRestart){
 
         shadeCurrentCanvas();
-        ctx.fillStyle = '#00cc00';
+
+        ctx.fillStyle = "rgba("+ color +", "+ this.countDown / 100 +")";
         ctx.fillRect(0, 0, Constants.canvasWidth, Constants.infoBarHeight);
 
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = 'black';
-        ctx.fillText('Completed', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
-        ctx.strokeText('Completed', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.fillText(message, Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
 
-        restart();
-    };
+        this.countDown -= 2;
+
+        if (this.countDown <= 0){
+            this.countDown = 100;
+
+            if (doRestart)
+                this.restart();
+            else{
+                this.doFadingMessage = false;
+                this.startMenu();
+            }
+        }
+    }
 
     /*
      * Function: collisionDetected
      */
-    this.collisionDetected = function(){
-        shadeCurrentCanvas();
-        ctx.fillStyle = '#cc0000';
-        ctx.strokeStyle = 'black';
-        ctx.fillRect(0, 0, Constants.canvasWidth, Constants.infoBarHeight);
+    this.collisionDetected = function()
+    {
+        var color = "255, 150, 0";
+        var message = "Failed!";
 
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText('Failed', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
-        ctx.strokeText('Failed', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
-
-        restart();
-
+        this.fadeMessage(color, message, true);
     };
-
-    function restart(){
-        window.setTimeout(function(){
-            window.status = Menu.gameState.restart;
-        }, 300);
-    }
 
     /*
      * Function: gameOver
      */
-    this.gameOver = function(){
-        shadeCurrentCanvas();
-        ctx.fillStyle = '#cc0000';
-        ctx.strokeStyle = 'black';
-        ctx.fillRect(0, 0, Constants.canvasWidth, Constants.infoBarHeight);
+    this.gameOver = function()
+    {
+        var color = "200, 0, 0";
+        var message = "Game Over!";
 
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText('Game Over', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
-        ctx.strokeText('Game Over', Constants.canvasWidth / 2, Constants.infoBarHeight - 20);
+        if (this.doFadingMessage) {
+            this.fadeMessage(color, message, false);
+        }
+    }
+
+    this.restart = function(){
+        this.doFadingMessage = true;
+        window.status = Menu.gameState.restart;
     }
 };
