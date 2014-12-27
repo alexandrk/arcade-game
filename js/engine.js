@@ -25,61 +25,37 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-    canvas.width = Constants.canvasWidth;
-    canvas.height = Constants.canvasHeight;
+    canvas.width = 505;
+    canvas.height = 606;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
     function main() {
-
         /* Get our time delta information which is required if your game
          * requires smooth animation. Because everyone's computer processes
          * instructions at different speeds we need a constant value that
          * would be the same for everyone (regardless of how fast their
          * computer is) - hurray time!
          */
-
         var now = Date.now(),
             dt = (now - lastTime) / 1000.0;
 
-        if (global.status == Menu.gameState.initialization){
-            render();
-            Menu.startMenu();
-        }
-        else if (global.status == Menu.gameState.levelCompleted){
-            render();
-            Menu.levelCompleted();
-        }
-        else if (global.status == Menu.gameState.collision){
-            Menu.collisionDetected();
-        }
-        else if (global.status == Menu.gameState.gameOver){
-            Menu.gameOver();
-        }
+        /* Call our update/render functions, pass along the time delta to
+         * our update function since it may be used for smooth animation.
+         */
+        update(dt);
+        render();
 
-        else if (
-            global.status == Menu.gameState.newGame ||
-            global.status == Menu.gameState.restart ||
-            global.status == Menu.gameState.inProgress
-        ){
+        /* Set our lastTime variable which is used to determine the time delta
+         * for the next time this function is called.
+         */
+        lastTime = now;
 
-            /* Call our update/render functions, pass along the time delta to
-             * our update function since it may be used for smooth animation.
-             */
-            update(dt);
-            render();
-
-            /* Set our lastTime variable which is used to determine the time delta
-             * for the next time this function is called.
-             */
-            lastTime = now;
-
-            /* Use the browser's requestAnimationFrame function to call this
-             * function again as soon as the browser is able to draw another frame.
-             */
-        }
+        /* Use the browser's requestAnimationFrame function to call this
+         * function again as soon as the browser is able to draw another frame.
+         */
         win.requestAnimationFrame(main);
     };
 
@@ -118,7 +94,7 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update(dt);
+        player.update();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -156,7 +132,7 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83 - 50);
+                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
             }
         }
 
@@ -184,8 +160,7 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        global.status = Menu.gameState.initialization;
-
+        // noop
     }
 
     /* Go ahead and load all of the images we know we're going to need to
