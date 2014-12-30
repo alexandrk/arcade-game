@@ -98,12 +98,13 @@ Interface.prototype.nextLevel = function(level)
  */
 Interface.prototype.renderTimeLeft = function(timeLeft)
 {
+    ctx.save();
+
     ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
     ctx.textAlign = "left";
     ctx.fillText("Time Left: " + timeLeft.toString(),
         ctx.canvas.width / 2, CONSTANTS.FIELD.info_bar_height - 25);
 
-    ctx.textAlign = "center";
     ctx.restore();
 };
 
@@ -113,6 +114,8 @@ Interface.prototype.renderTimeLeft = function(timeLeft)
  */
 Interface.prototype.drawLife = function(life)
 {
+    ctx.save();
+
     ctx.fillStyle = "rgba(255, 0, 0, 0.7)";
     ctx.scale(.5, .5);
 
@@ -142,6 +145,8 @@ Interface.prototype.drawLife = function(life)
  */
 Interface.prototype.showMessage = function(color, message, fadeDirection, doRestart)
 {
+    ctx.save();
+
     var count = (fadeDirection === 'up') ? this.countUp : this.countDown;
 
     this.shadeCurrentCanvas();
@@ -180,13 +185,17 @@ Interface.prototype.startMenu = function () {
 /**
  * Helper, shades current state of the canvas
  */
-Interface.prototype.shadeCurrentCanvas = function() {
+Interface.prototype.shadeCurrentCanvas = function()
+{
+    ctx.save();
+
     var currentCanvas = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
     var pixels = currentCanvas.data.length / 4;
     for (var i = 0; i < pixels; i++) {
         currentCanvas.data[i * 4 + 3] = 125;
     }
     ctx.putImageData(currentCanvas, 0, 0);
+    ctx.restore();
 };
 
 /**
@@ -194,7 +203,9 @@ Interface.prototype.shadeCurrentCanvas = function() {
  *
  * @param type {string} - determines style change
  */
-Interface.prototype.drawStartButton = function() {
+Interface.prototype.drawStartButton = function()
+{
+    ctx.save();
 
     var type, my_gradient;
 
@@ -230,6 +241,7 @@ Interface.prototype.drawStartButton = function() {
     ctx.strokeText("Start",
                  CONSTANTS.OBJECTS_PROPERTIES.START_BUTTON.x + 120,
                  CONSTANTS.OBJECTS_PROPERTIES.START_BUTTON.y + 42);
+    ctx.restore();
 };
 
 /**
@@ -259,6 +271,7 @@ Interface.prototype.withinStartButton = function(evt)
  */
 Interface.prototype.drawRoundedRectanle = function(x, y, width, height, r)
 {
+    ctx.save();
     ctx.beginPath();
     ctx.moveTo(x + r, y);
     ctx.lineTo(x + width - r, y);
@@ -272,4 +285,5 @@ Interface.prototype.drawRoundedRectanle = function(x, y, width, height, r)
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+    ctx.restore();
 };

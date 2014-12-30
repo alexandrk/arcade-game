@@ -273,8 +273,12 @@ var Game = function(){
 };
 
 var Level = function(){
-    this.number = 1;
+    this.number = this.reset();
 };
+
+Level.prototype.reset = function(){
+    this.number = 1;
+}
 
 Level.prototype.levelUp = function(){
     this.number += 1;
@@ -328,6 +332,7 @@ var interface = new Interface(),
 function startGame(){
     Enemy.prototype.speeds('reset');
     game.resetTime();
+    level.reset();
     allEnemies = [new Enemy()];
     player = new Player();
 }
