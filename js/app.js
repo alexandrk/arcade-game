@@ -52,7 +52,14 @@ var Enemy = function() {
     this.speed = this.speeds('add');
 };
 
-
+/**
+ * Function utilizing closure to store speeds array
+ * has different operations that it accepts {string}:
+ *   - reset - resets the speeds array to default
+ *   - add - adds a new speed to the array
+ *   - get - returns a random speed from the array
+ *   - show - returns the whole array
+ */
 Enemy.prototype.speeds = function(){
     var speeds = [50];
 
@@ -115,7 +122,7 @@ var Player = function(){
     this.x = CONSTANTS.OBJECTS_PROPERTIES.PLAYER.DEFAULT.x;
     this.y = CONSTANTS.OBJECTS_PROPERTIES.PLAYER.DEFAULT.y;
     this.sprite = 'images/char-boy.png';
-    this.collisionTriggered = false;
+    this.collided = false;
     this.dead = false;
     this.life = 3;
 };
@@ -124,69 +131,22 @@ var Player = function(){
  * Updates player position
  */
 Player.prototype.update = function(){
-    this.collisionDetection();
 };
 
 /**
- * Render's player on the game screen
+ * Renders player on the game screen
  */
 Player.prototype.render = function(){
-
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-
-    /* Draws heart shape lifes in the top left corner */
-    interface.drawLife(this.life);
-    game.render();
-
-    /* Draw Collision message, if collision detected */
-    if (this.collisionTriggered){
-        interface.collisionDetected(this.life);
-    }
-
-    if (this.dead){
-        interface.gameOver();
-    }
-
-    /* Draw Next Level Message, if level completed */
-    if (this.y <= CONSTANTS.FIELD.winning_zone){
-        interface.nextLevel(level.number + 1)
-    }
 };
 
 /**
  * Resets player's position and collision trigger
  */
 Player.prototype.resetPosition = function(){
-
     this.x = CONSTANTS.OBJECTS_PROPERTIES.PLAYER.DEFAULT.x;
     this.y = CONSTANTS.OBJECTS_PROPERTIES.PLAYER.DEFAULT.y;
-    this.collisionTriggered = false;
-};
-
-/**
- * Checks for collisions between player and enemy objects
- */
-Player.prototype.collisionDetection = function(){
-    /*
-     * Collision Detection Logic
-     *  - Dependent on global allEnemies array
-     *  + if collision found:
-     *      - set collisionTriggered property on the player
-     */
-    if (!this.collisionTriggered){
-        for (var i = 0; i < allEnemies.length; i++)
-        {
-            var enemy = allEnemies[i];
-            if (this.x < enemy.x + CONSTANTS.HIT_ZONE.width &&
-                this.x + CONSTANTS.HIT_ZONE.width > enemy.x &&
-                this.y < enemy.y + CONSTANTS.HIT_ZONE.height &&
-                this.y + CONSTANTS.HIT_ZONE.height > enemy.y)
-            {
-                this.collisionTriggered = true;
-                break;
-            }
-        }
-    }
+    this.collided = false;
 };
 
 /**
@@ -208,7 +168,7 @@ Player.prototype.updateLife = function(tick){
  */
 Player.prototype.handleInput = function(direction){
 
-    if (!this.collisionTriggered && !this.dead){
+    if (!this.collided && !this.dead){
         var tempValue = 0;
         switch (direction){
             case "left":
@@ -237,58 +197,217 @@ Player.prototype.handleInput = function(direction){
                 break;
         }
     }
-    //console.log("{" + CONSTANTS.FIELD.width +", "+ CONSTANTS.FIELD.height + "}");
-    //console.log("{" + player.x +", "+ player.y + "}");
 };
 
+/**
+ * Game wrapper
+ */
 var Game = function(){
     this.timeLeft = 30;
     this.timestamp = Date.now();
+    this.collisionTriggered = false;
+    this.levelCompleted = false;
+    this.gameOver = false;
+    this.level = 1;
+    this.score = 0;
+    this.prevScore = 0;
 
+    /**
+     * Updates time left (basic countdown from default to 0)
+     */
     this.updateTime = function(){
-
         if (Date.now() - this.timestamp > 1000) {
             this.timeLeft -= 1;
             this.timestamp = Date.now();
         }
 
+        /* if no time left, remove one life and reset the clock */
         if (this.timeLeft == 0){
-            player.updateLife(-1);
+            this.player.updateLife(-1);
             this.resetTime();
         }
     };
 
+    /**
+     * Resets time to default
+     */
     this.resetTime = function(){
         this.timeLeft = 30;
     };
 
-    this.update = function(){
-        this.updateTime();
+    /**
+     * Updates total score:
+     *   - each level is 50 points
+     *   - each second of time left is 1 point
+     */
+    this.updateScore = function(){
+        this.score = this.level * 50 + this.timeLeft;
     };
 
+    /**
+     * Resets score to 0 (prevScore is used in the score animation)
+     */
+    this.resetScore = function(){
+        this.score = 0;
+        this.prevScore = 0;
+    };
+
+    /**
+     * Updates for all game entities happen here
+     * @param dt
+     */
+    this.update = function(dt){
+        this.player.update();
+
+        /* collision detection function, sets this.collisionTriggered to TRUE on collision */
+        this.collisionDetection();
+
+        /* player.collided is used in player.handleInput to prevent player from moving */
+        this.player.collided = this.collisionTriggered;
+
+        /* check for level completion */
+        this.levelCompleted = (this.player.y <= CONSTANTS.FIELD.winning_zone);
+
+        /* stop time when level completed or game is over */
+        if (!this.levelCompleted && !this.gameOver){
+            this.updateTime();
+        }
+
+        /* run updates on all the enimies */
+        this.allEnemies.forEach(function(enemy) {
+            enemy.update(dt);
+        });
+    };
+
+    /**
+     * Resets the game states
+     */
+    this.reset = function(){
+        this.level = 1;
+        this.resetTime();
+        this.resetScore();
+        this.levelCompleted = false;
+        this.gameOver = false;
+    }
+
+    /**
+     * Renders all game elements
+     */
     this.render = function(){
-        this.update();
-        interface.renderTimeLeft(this.timeLeft);
+        this.player.render();
+        this.interface.drawLife(this.player.life);
+        this.interface.renderTimeLeft(this.timeLeft);
+
+        /* Render enemies */
+        this.allEnemies.forEach(function(enemy) {
+            enemy.render();
+        });
+
+        /* Draw Collision message, if collision detected */
+        if (this.collisionTriggered){
+            this.interface.collisionDetected();
+        }
+
+        /* render score calculation,  */
+        if (this.levelCompleted){
+            this.updateScore();
+            this.interface.nextLevel(this.level + 1, this.score);
+            this.interface.animateScore(this.prevScore, this.score);
+        }
+        else{
+            this.interface.renderScore(this.score);
+        }
+
+        /* Draws game over message */
+        if (this.player.dead){
+            this.gameOver = true;
+            this.interface.gameOver();
+        }
+    };
+
+    /**
+     * Recreates the start game states for all the entities
+     */
+    this.newGame = function(){
+        Enemy.prototype.speeds('reset');
+
+        this.interface  = new Interface();
+        this.player     = new Player();
+        this.allEnemies = [new Enemy()];
+
+        this.reset();
+    };
+
+    /**
+     * Checks for collisions between player and enemy objects
+     * @returns {boolean} - used to set collisionTriggered
+     */
+    this.collisionDetection = function(){
+        /*
+         * Collision Detection Logic
+         *  - Dependent on global allEnemies array
+         *  + if collision found:
+         *      - set collisionTriggered property on the player
+         */
+        if (!this.collisionTriggered){
+            for (var i = 0; i < this.allEnemies.length; i++)
+            {
+                var enemy = this.allEnemies[i];
+                if (this.player.x < enemy.x + CONSTANTS.HIT_ZONE.width &&
+                    this.player.x + CONSTANTS.HIT_ZONE.width > enemy.x &&
+                    this.player.y < enemy.y + CONSTANTS.HIT_ZONE.height &&
+                    this.player.y + CONSTANTS.HIT_ZONE.height > enemy.y)
+                {
+                    this.collisionTriggered = true;
+                    break;
+                }
+            }
+        }
+    };
+
+    /**
+     * Is executed after the collision animation finishes
+     */
+    this.collisionCallback = function(){
+        this.player.updateLife(-1);
+        this.player.resetPosition();
+
+        /* resets animation counters in the interface class */
+        this.interface.reset();
+
+        this.collisionTriggered = false;
+    };
+
+    /**
+     * Is executed after the level completed animation finishes
+     */
+    this.levelCompletedCallback = function(){
+        this.prevScore = this.score;
+        this.player.resetPosition();
+        this.interface.reset();
+        this.level += 1;
+
+        /* start removing slow speeds from the speeds array,
+           every other level, after level 5 */
+        if (this.level >= 5 && this.level % 2 > 0){
+            Enemy.prototype.speeds('show').shift();
+        }
+        this.allEnemies.push(new Enemy());
+
+        this.resetTime();
+    };
+
+    /**
+     * Is executed after game over animation finishes
+     */
+    this.gameOverCallback = function(){
+        this.interface.startMenu();
     }
 };
 
-var Level = function(){
-    this.number = this.reset();
-};
-
-Level.prototype.reset = function(){
-    this.number = 1;
-}
-
-Level.prototype.levelUp = function(){
-    this.number += 1;
-    allEnemies.push(new Enemy());
-
-    /* start removing slow speeds from the speeds array, every other level, after level 5 */
-    if (this.number >= 5 && this.number % 2 > 0){
-        Enemy.prototype.speeds('show').shift();
-    }
-};
+// Start the game
+var game = new Game();
+game.newGame();
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
@@ -299,48 +418,57 @@ document.addEventListener('keyup', function(e) {
         39: 'right',
         40: 'down'
     };
-
-    player.handleInput(allowedKeys[e.keyCode]);
-});
-document.addEventListener('startgame', startGame);
-
-document.addEventListener('collision', function(e){
-    player.updateLife(-1);
-    interface.reset();
-    player.resetPosition();
+    game.player.handleInput(allowedKeys[e.keyCode]);
 });
 
-document.addEventListener('gameover', function(e){
-    player.updateLife(-1);
-    interface.startMenu();
-});
+document.addEventListener('startgame',      game.newGame.bind(game));
+document.addEventListener('collision',      game.collisionCallback.bind(game));
+document.addEventListener('gameover',       game.gameOverCallback.bind(game));
+document.addEventListener('levelcomplete',  game.levelCompletedCallback.bind(game));
 
-document.addEventListener('levelcomplete', function(e){
-    level.levelUp();
-    game.resetTime();
-    interface.reset();
-    player.resetPosition();
-});
+/* event handler for touch events */
+ctx.canvas.addEventListener('touchstart',   handleTouch, false);
 
-// Start the game
-var interface = new Interface(),
-    level = new Level(),
-    game = new Game(),
-    allEnemies = [],
-    player;
+/**
+ * Gets the position of the touch event and converts it to the direction,
+ * which than gets passed to player.handleInput for processing
+ * @param e - event object
+ */
+function handleTouch(e) {
 
-function startGame(){
-    Enemy.prototype.speeds('reset');
-    game.resetTime();
-    level.reset();
-    allEnemies = [new Enemy()];
-    player = new Player();
+    /* condition needed to detect button click on the Restart button */
+    if (!game.gameOver){
+        e.preventDefault();
+    }
+
+    var touch = {
+        x: e.touches[0].clientX - ctx.canvas.offsetLeft,
+        y: e.touches[0].clientY - ctx.canvas.offsetTop - 70
+    };
+    var move;
+
+    if (touch.x < game.player.x &&
+        touch.y > game.player.y &&
+        touch.y < game.player.y + CONSTANTS.OBJECTS_PROPERTIES.CELL_SIZE.y){
+        move = 'left';
+    }else if (touch.y < game.player.y &&
+        touch.x > game.player.x &&
+        touch.x < game.player.x + CONSTANTS.OBJECTS_PROPERTIES.CELL_SIZE.x) {
+        move = 'up';
+    }else if (touch.x > game.player.x + CONSTANTS.OBJECTS_PROPERTIES.CELL_SIZE.x &&
+        touch.y > game.player.y &&
+        touch.y < game.player.y + CONSTANTS.OBJECTS_PROPERTIES.CELL_SIZE.y){
+        move = 'right';
+    }else if (touch.y > game.player.y + CONSTANTS.OBJECTS_PROPERTIES.CELL_SIZE.y &&
+        touch.x > game.player.x &&
+        touch.x < game.player.x + CONSTANTS.OBJECTS_PROPERTIES.CELL_SIZE.x) {
+        move = 'down';
+    }
+
+    game.player.handleInput(move);
 }
 
 /* Helper Functions */
-
 function getRandomIndex(array){
     return Math.floor(Math.random() * array.length);
 }
-
-startGame();

@@ -5,10 +5,11 @@ var Interface = function() {
         clientX: 0,
         clientY: 0
     };
+    this.reset();
 
     ctx.strokeStyle = "#555555";
     ctx.lineWidth = 2;
-    ctx.font = "35pt impact";
+    ctx.font = "25pt 'Sigmar One'";
     ctx.textAlign = "center";
     ctx.save();
 
@@ -47,6 +48,7 @@ Interface.prototype.buttonOver = function(evt)
 Interface.prototype.reset = function(){
     this.countDown = 100;
     this.countUp = 0;
+    this.scoreUp = 0;
 };
 
 /**
@@ -81,13 +83,13 @@ Interface.prototype.gameOver = function()
 /**
  * Draws level completed message
  */
-Interface.prototype.nextLevel = function(level)
+Interface.prototype.nextLevel = function(level, score)
 {
     var color = "0, 200, 0",
         message = "Level " + level,
         finished = this.showMessage(color, message, "down", false);
 
-    if (finished) {
+    if (finished && this.scoreUp >= score) {
         document.dispatchEvent(new CustomEvent('levelcomplete'));
     }
 };
@@ -102,8 +104,8 @@ Interface.prototype.renderTimeLeft = function(timeLeft)
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
     ctx.textAlign = "left";
-    ctx.fillText("Time Left: " + timeLeft.toString(),
-        ctx.canvas.width / 2, CONSTANTS.FIELD.info_bar_height - 25);
+    ctx.fillText("Time: " + timeLeft.toString(),
+        30, ctx.canvas.height - 20);
 
     ctx.restore();
 };
@@ -132,6 +134,32 @@ Interface.prototype.drawLife = function(life)
 
         ctx.translate(120, 0);
     }
+    ctx.restore();
+};
+
+Interface.prototype.animateScore = function(fromScore, toScore){
+
+    this.scoreUp = (this.scoreUp >= fromScore) ? this.scoreUp : fromScore;
+
+    if (this.scoreUp < toScore) {
+        this.renderScore(this.scoreUp);
+        this.scoreUp += 1;
+    }
+};
+
+/**
+ * Draws current score
+ * @param score {number} - game score
+ */
+Interface.prototype.renderScore = function(score)
+{
+    ctx.save();
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    ctx.textAlign = "right";
+    ctx.fillText("Score: "+ score,
+        ctx.canvas.width - 30, ctx.canvas.height - 20);
+
     ctx.restore();
 };
 
@@ -178,7 +206,7 @@ Interface.prototype.showMessage = function(color, message, fadeDirection, doRest
  * Shows start menu overlay
  */
 Interface.prototype.startMenu = function () {
-    this.shadeCurrentCanvas();
+    //this.shadeCurrentCanvas();
     this.drawStartButton();
 };
 
@@ -235,12 +263,12 @@ Interface.prototype.drawStartButton = function()
                              10, ctx.fillStyle);
 
     ctx.fillStyle = "white";
-    ctx.fillText("Start",
+    ctx.fillText("Restart",
                  CONSTANTS.OBJECTS_PROPERTIES.START_BUTTON.x + 120,
-                 CONSTANTS.OBJECTS_PROPERTIES.START_BUTTON.y + 42);
-    ctx.strokeText("Start",
+                 CONSTANTS.OBJECTS_PROPERTIES.START_BUTTON.y + 35);
+    ctx.strokeText("Restart",
                  CONSTANTS.OBJECTS_PROPERTIES.START_BUTTON.x + 120,
-                 CONSTANTS.OBJECTS_PROPERTIES.START_BUTTON.y + 42);
+                 CONSTANTS.OBJECTS_PROPERTIES.START_BUTTON.y + 35);
     ctx.restore();
 };
 
