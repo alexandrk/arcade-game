@@ -173,11 +173,20 @@ Interface.prototype.renderScore = function(score)
  */
 Interface.prototype.showMessage = function(color, message, fadeDirection, doRestart)
 {
+
+    /* return true, if the animation is complete */
+    if ((this.countDown < 0 && fadeDirection === 'down') ||
+        (this.countUp > 100 && fadeDirection === 'up')
+    ){
+        return true;
+    }
+
     ctx.save();
 
     var count = (fadeDirection === 'up') ? this.countUp : this.countDown;
 
-    this.shadeCurrentCanvas();
+    // Sacrifices, since is really slow on mobile
+    //this.shadeCurrentCanvas();
 
     ctx.fillStyle = "rgba("+ color +", "+ count / 100 +")";
     ctx.fillRect(0, 0, ctx.canvas.width, CONSTANTS.FIELD.info_bar_height);
@@ -191,13 +200,6 @@ Interface.prototype.showMessage = function(color, message, fadeDirection, doRest
         this.countUp += 2;
     }
     ctx.restore();
-
-    /* return true, if the animation is complete */
-    if ((this.countDown < 0 && fadeDirection === 'down') ||
-        (this.countUp > 100 && fadeDirection === 'up')
-    ){
-        return true;
-    }
 
     return false;
 };
@@ -279,12 +281,12 @@ Interface.prototype.drawStartButton = function()
 Interface.prototype.withinStartButton = function(evt)
 {
     if (evt !== undefined){
-        this.mouseXY.clientX = evt.clientX;
-        this.mouseXY.clientY = evt.clientY;
+        this.mouseXY.clientX = evt.pageX;
+        this.mouseXY.clientY = evt.pageY;
     }
 
-    var mouseX = this.mouseXY.clientX - ctx.canvas.offsetLeft,
-        mouseY = this.mouseXY.clientY - ctx.canvas.offsetTop;
+    var mouseX = this.mouseXY.clientX - ctx.canvas.offsetParent.offsetLeft - ctx.canvas.offsetLeft,
+        mouseY = this.mouseXY.clientY - ctx.canvas.offsetParent.offsetTop - ctx.canvas.offsetTop;
 
     return (
     mouseX >= ((ctx.canvas.width / 2 ) - (CONSTANTS.OBJECTS_PROPERTIES.START_BUTTON.width / 2)) &&
