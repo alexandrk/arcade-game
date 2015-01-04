@@ -1,14 +1,181 @@
+html, body { margin:0; padding:0; height:100%; }
 body{
-  font-family: 'Helvetica Neue', Helvetica, Arial, serif;
+  background-color: black;
+  color: white;
+  position: relative;
+  width: 100%;
 }
 
-#banner{
-  background-color: #6f5499;
+/* Navigation */
+.navbar-inverse {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  background-color: transparent;
+  padding: 0;
+  position: fixed;
+  transition: all .5s ease-in-out;
 }
 
-#banner>h1{
+.top-nav-collapse {
+  background-color: black;
+  border-bottom: 1px solid grey;
+  z-index: 1;
+}
+
+nav{
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+@media (min-width: 845px) {
+  .navbar-header {
+    width: 40%;
+  }
+  #title{
+    float: right;
+  }
+}
+
+#navbar-collapse-1 {
+  float: right;
+}
+
+.nav li:hover {
+  border-bottom: 2px solid white;
+}
+
+.navbar-inverse .navbar-nav>.active>a,
+.navbar-inverse .navbar-nav>.active>a:hover,
+.navbar-inverse .navbar-nav>.active>a:focus{
+  background-color: #222222;
+}
+
+.navbar-brand {
+  padding: 10px 0 0 0;
+  overflow: auto;
+}
+
+#logo {
+  width: 100px;
+}
+
+#title {
+  color: white;
+  display: inline-block;
+  font-family: 'Sigmar One';
+  font-size: 20px;
+  padding: 10px 25px 0 0;
+
+}
+
+@media (max-width: 660px) {
+  .title-super {
+    font-size: 30px;
+    margin-top: 5px;
+  }
+}
+
+/* Section: About */
+#about {
+  display: table;
+  padding-top: 50px;
+  width: 100%;
+  height: 100%;
+  background: url("../images/intro-bg-1.jpg") no-repeat bottom center scroll;
+  background-size: cover;
+}
+
+.about-body {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
   color: white;
 }
-#banner>h2{
-  color: #e3d2d2;
+
+.about-body h1 {
+  text-transform: uppercase;
+  font-size: 45px;
+  font-weight: bold;
+}
+.about-body h2 {
+  margin: 20px 0;
+}
+
+.about-body .btn-circle {
+  border: 2px solid white;
+  border-radius: 35px;
+  color: white;
+  font-size: 30px;
+  margin-top: 40px;
+  width: 50px;
+  height: 50px;
+
+  transition: all .5s ease-in-out;
+}
+
+.about-body .btn-circle:hover {
+  border-radius: 20px;
+}
+
+#source {
+  height: 100%;
+  width: 100%;
+  padding: 50px;
+  display: table;
+  background: url("../images/source-code-bg.jpg") no-repeat center center scroll;
+}
+
+.source-body{
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#play {
+  height: 100%;
+  width: 100%;
+  padding: 50px;
+  display: table;
+  background: url("../images/credits-bg.jpg") no-repeat bottom center scroll;
+}
+
+.play-body{
+  display: table-cell;
+  vertical-align: middle;
+  text-align: right;
+}
+
+.my-modal {
+  border: 1px solid grey;
+  border-radius: 10px;
+  padding: 0px;
+  box-shadow: 0 0 1px #676F81;
+}
+.my-modal-header {
+  border-radius: 10px 10px 0 0;
+  border-bottom: 1px solid grey;
+  text-align: center;
+}
+
+.my-modal-header, .my-modal-body {
+  margin: 0;
+  padding: 20px;
+}
+
+.hidden-warning {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  #game {
+    display: none;
+  }
+  .hidden-warning {
+    display: block;
+  }
+}
+
+.wide{
+  width: 220px;
+  margin-bottom: 10px;
 }

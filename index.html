@@ -3,8 +3,9 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link href='http://fonts.googleapis.com/css?family=Sigmar+One' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
     <title>Frogger (a Udacity Nanodegree Project) by alexandrk</title>
@@ -13,94 +14,99 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
-  <body>
+  <body data-spy="scroll" data-target=".navbar-inverse">
 
+  <header class="navbar-inverse container" role="banner">
 
+      <nav role="navigation">
+        <div class="container-fluid">
 
-  <header role="banner">
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Brand</a>
+          <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+
+            <div id="title">Frogger</div>
+
+            <a class="navbar-brand" href="#"><img id="logo" src="images/brand.png" alt="logo"></a>
+          </div>
+
+          <div class="collapse navbar-collapse" id="navbar-collapse-1">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="#about" class="page-scroll">About Project <span class="sr-only">(current)</span></a></li>
+              <li><a href="#source" class="page-scroll">Source Code</a></li>
+              <li><a href="#play" class="page-scroll">Play</a></li>
+            </ul>
+          </div>
+
         </div>
+      </nav>
 
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-            <li><a href="#">Link</a></li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li><a href="#">Something else here</a></li>
-                <li class="divider"></li>
-                <li><a href="#">Separated link</a></li>
-                <li class="divider"></li>
-                <li><a href="#">One more separated link</a></li>
-              </ul>
-            </li>
-          </ul>
-          <form class="navbar-form navbar-left" role="search">
-            <div class="form-group">
-              <input type="text" class="form-control" placeholder="Search">
-            </div>
-            <button type="submit" class="btn btn-default">Submit</button>
-          </form>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Link</a></li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li><a href="#">Something else here</a></li>
-                <li class="divider"></li>
-                <li><a href="#">Separated link</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-
-      </div>
-    </nav>
   </header>
 
-  <div class="container" id="banner">
-    <h1>Frogger (a Udacity Nanodegree Project)</h1>
-    <h2>frogger, html5 canvas, javascript</h2>
-  </div>
+  <header id="about">
+    <div class="about-body container">
+      <div class="row">
+        <div class="col-lg-6 col-lg-offset-3">
+          <h1>Frogger</h1>
+          <h2>[ Project 3 ]</h2>
+          <p>
+            Recreate a classic arcade game frogger, using Javascript and HTML5 Canvas.<br />
+            Added levels, and Game Score for extra credit.
+          </p>
+          <a href="#source" class="btn btn-circle page-scroll">V</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="source">
+
+    <div class="source-body container">
+      <div class="row">
+        <div class="col-lg-6 col-lg-offset-3 my-modal">
+          <h2 class="my-modal-header">Source Code</h2>
+          <p class="my-modal-body text-center">
+
+            <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game" class="btn btn-primary btn-lg wide">View Project on GitHub</a>
+            <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game/zipball/master" class="btn btn-primary btn-lg wide">Download .zip file</a>
+            <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game/tarball/master" class="btn btn-primary btn-lg wide">Download .tar.gz file</a>
+            <p class="text-center">The project is maintained by <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game"></a> is maintained by <a href="https://github.com/alexandrk">alexandrk</a>.</p>
 
 
+          </p>
+        </div>
+      </div>
+    </div>
 
-  <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game" class="button">
+  </section>
 
+  <section id="play">
 
+    <div class="play-body container">
+      <div class="row">
+        <div class="col-lg-6 col-lg-offset-3 my-modal">
+          <h2 class="my-modal-header">Play</h2>
+          <div class="my-modal-body text-center"><div id="game"></div><div class="hidden-warning">Sorry, the game is only available on screens with width of 720px and above.</div></div>
+        </div>
+      </div>
+    </div>
 
-    <aside id="sidebar">
-      <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game/zipball/master" class="button">
-        <small>Download</small>
-        .zip file
-      </a>
-      <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game/tarball/master" class="button">
-        <small>Download</small>
-        .tar.gz file
-      </a>
+  </section>
 
-      <p class="repo-owner"><a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game"></a> is maintained by <a href="https://github.com/alexandrk">alexandrk</a>.</p>
-
-      <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-    </aside>
-
-  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-  <!-- Include all compiled plugins (below), or include individual files as needed -->
-  <script src="js/bootstrap.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  <script src="javascripts/jquery.easing.min.js"></script>
+  <script src="javascripts/main.js"></script>
+
+  <script src="javascripts/resources.js"></script>
+  <script src="javascripts/shims.js"></script>
+  <script src="javascripts/engine.js"></script>
+  <script src="javascripts/interface.js"></script>
+  <script src="javascripts/app.js"></script>
   </body>
 </html>
