@@ -411,13 +411,19 @@ game.newGame();
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
-document.addEventListener('keyup', function(e) {
+document.addEventListener('keydown', function(e) {
+
     var allowedKeys = {
         37: 'left',
         38: 'up',
         39: 'right',
         40: 'down'
     };
+
+    if (allowedKeys[e.keyCode] !== undefined){
+        e.preventDefault();
+    }
+
     game.player.handleInput(allowedKeys[e.keyCode]);
 });
 
@@ -427,7 +433,7 @@ document.addEventListener('gameover',       game.gameOverCallback.bind(game));
 document.addEventListener('levelcomplete',  game.levelCompletedCallback.bind(game));
 
 /* event handler for touch events */
-ctx.canvas.addEventListener('touchstart',   handleTouch, false);
+document.addEventListener('touchstart',   handleTouch, false);
 
 /**
  * Gets the position of the touch event and converts it to the direction,
@@ -436,14 +442,9 @@ ctx.canvas.addEventListener('touchstart',   handleTouch, false);
  */
 function handleTouch(e) {
 
-    /* condition needed to detect button click on the Restart button */
-    if (!game.gameOver){
-        e.preventDefault();
-    }
-
     var touch = {
-        x: e.touches[0].clientX - ctx.canvas.offsetLeft,
-        y: e.touches[0].clientY - ctx.canvas.offsetTop - 70
+        x: e.touches[0].pageX - ctx.canvas.offsetParent.offsetLeft - ctx.canvas.offsetLeft,
+        y: e.touches[0].pageY - ctx.canvas.offsetParent.offsetTop - ctx.canvas.offsetTop - 70
     };
     var move;
 
@@ -463,6 +464,11 @@ function handleTouch(e) {
         touch.x > game.player.x &&
         touch.x < game.player.x + CONSTANTS.OBJECTS_PROPERTIES.CELL_SIZE.x) {
         move = 'down';
+    }
+
+    /* condition needed to detect button click on the Restart button */
+    if (!game.gameOver && move !== undefined){
+        e.preventDefault();
     }
 
     game.player.handleInput(move);
