@@ -11,7 +11,7 @@ $(function() {
 
     })
 
-    // jQuery for page scrolling feature - requires jQuery Easing plugin
+    /* jQuery for page scrolling feature - requires jQuery Easing plugin */
     $(function() {
         $('a.page-scroll').bind('click', function(event) {
             var $anchor = $(this);
@@ -22,5 +22,9 @@ $(function() {
         });
     });
 
+    $('.hidden-warning').on('click', 'a', function(e){
+        e.preventDefault();
+        $('#game').toggle();
+    })
 
 });
