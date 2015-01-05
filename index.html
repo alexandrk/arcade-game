@@ -3,7 +3,7 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
+    <meta name="viewport" content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1' />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     <link href='http://fonts.googleapis.com/css?family=Sigmar+One' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
@@ -75,7 +75,7 @@
             <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game" class="btn btn-primary btn-lg wide">View Project on GitHub</a>
             <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game/zipball/master" class="btn btn-primary btn-lg wide">Download .zip file</a>
             <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game/tarball/master" class="btn btn-primary btn-lg wide">Download .tar.gz file</a>
-            <p class="text-center">The project is maintained by <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game"></a> is maintained by <a href="https://github.com/alexandrk">alexandrk</a>.</p>
+            <p class="text-center">The <a href="https://github.com/alexandrk/frontend-nanodegree-arcade-game">project</a> is maintained by <a href="https://github.com/alexandrk">alexandrk</a>.</p>
 
 
           </p>
@@ -91,7 +91,13 @@
       <div class="row">
         <div class="col-lg-6 col-lg-offset-3 my-modal">
           <h2 class="my-modal-header">Play</h2>
-          <div class="my-modal-body text-center"><div id="game"></div><div class="hidden-warning">Sorry, the game is only available on screens with width of 720px and above.</div></div>
+          <div class="my-modal-body text-center">
+            <div id="game"></div>
+            <div class="hidden-warning">
+              Warning, the game is built for devices with width of 720px and above.<br>
+              <a href="#">Show the Game anyway.</a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
