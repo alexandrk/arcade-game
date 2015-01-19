@@ -433,7 +433,7 @@ document.addEventListener('gameover',       game.gameOverCallback.bind(game));
 document.addEventListener('levelcomplete',  game.levelCompletedCallback.bind(game));
 
 /* event handler for touch events */
-document.addEventListener('touchstart',   handleTouch, false);
+ctx.canvas.addEventListener('touchstart',   handleTouch, false);
 
 /**
  * Gets the position of the touch event and converts it to the direction,
