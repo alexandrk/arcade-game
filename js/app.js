@@ -151,10 +151,10 @@ Player.prototype.resetPosition = function(){
 
 /**
  * Update player life
- * @param tick
+ * @param life {integer} - the value that player life should change by 
  */
-Player.prototype.updateLife = function(tick){
-    (this.life >= 0) ? this.life += tick : this.life;
+Player.prototype.updateLife = function(life){
+    (this.life >= 0) ? this.life += life : this.life;
 
     if (this.life <= 0){
         this.dead = true;
@@ -163,8 +163,7 @@ Player.prototype.updateLife = function(tick){
 
 /**
  * Handles keyboard input
- * @param direction
- * @note REFACTOR hardcoded values for going out of field boundaries
+ * @param direction {string} - direction of player's next move
  */
 Player.prototype.handleInput = function(direction){
 
